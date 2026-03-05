@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BOOT/BOOT.csproj" />
+  <Project Path="Uefi/Uefi.shproj" />
+</Solution>
