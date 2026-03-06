@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -25,32 +25,8 @@
   </Target>
 
   <Target Name="CreateVHD" AfterTargets="CopyEFI">
-    <PropertyGroup>
-      <VHDFilePath>$(MSBuildProjectDirectory)\$(NativeOutputPath)$(TargetName).vhd</VHDFilePath>
-      <AttachVHDLines>
-        create vdisk file="$(VHDFilePath)" maximum=500
-        select vdisk file="$(VHDFilePath)"
-        attach vdisk
-        convert gpt
-        create partition efi size=100
-        format quick fs=fat32 label="System"
-        assign letter=X
-      </AttachVHDLines>
-      <DetachVHDLines>
-        select vdisk file="$(VHDFilePath)"
-        select partition 2
-        remove letter=X
-        detach vdisk
-      </DetachVHDLines>
-    </PropertyGroup>
-    <Delete Files="$(VHDFilePath)" />
-    <WriteLinesToFile File="$(IntermediateOutputPath)attachvhd.txt" Overwrite="true" Lines="$(AttachVHDLines)" />
-    <Exec Command="diskpart /s &quot;$(IntermediateOutputPath)attachvhd.txt&quot;" />
-    <Exec Command="xcopy.exe  &quot;$(MSBuildProjectDirectory)\..\ROOT\&quot; &quot;X:\&quot; /e" />
-    <WriteLinesToFile File="$(IntermediateOutputPath)detachvhd.txt" Overwrite="true" Lines="$(DetachVHDLines)" />
-    <Exec Command="diskpart /s &quot;$(IntermediateOutputPath)detachvhd.txt&quot;" />
+    <Exec Command="$(MSBuildProjectDirectory)\..\VDiskCreater.exe $(MSBuildProjectDirectory)\..\RaisingOS.vhd 100 $(MSBuildProjectDirectory)\..\ROOT" />
     <Message Text="Created VHDX at $(VHDFilePath)." Importance="High" />
-    <Copy SourceFiles="$(MSBuildProjectDirectory)\$(NativeOutputPath)$(TargetName).vhd" DestinationFiles="$(MSBuildProjectDirectory)\..\RaisingOS.vhd"></Copy>
   </Target>
   
   <Target Name="RunVMware" AfterTargets="CreateVHD">
